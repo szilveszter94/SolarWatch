@@ -1,3 +1,8 @@
 namespace SolarWatch.Model;
 
-public record LocationData( int Id, string City, double Lat, double Lon );
+public class LocationData {
+    public int Id { get; set; }
+    public string City { get; set; }
+    public double Lat { get; set; }
+    public double Lon { get; set; }
+};
