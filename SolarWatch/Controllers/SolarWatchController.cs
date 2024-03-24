@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using SolarWatch.Model;
+using SolarWatch.Repository;
 using SolarWatch.Service.Processors;
 using SolarWatch.Service.Providers;
 
@@ -13,15 +14,17 @@ public class SolarWatchController : ControllerBase
     private readonly ISunsetSunriseDataProcessor _sunsetSunriseDataProcessor;
     private readonly IWeatherDataProvider _weatherDataProvider;
     private readonly ILocationDataProvider _locationDataProvider;
+    private readonly ICityRepository _cityRepository;
     
     public SolarWatchController(ILogger<SolarWatchController> logger
         ,ILocationDataProcessor locationDataProcessor,
-        ISunsetSunriseDataProcessor sunriseDataProcessor, IWeatherDataProvider weatherDataProvider, ILocationDataProvider locationDataProvider)
+        ISunsetSunriseDataProcessor sunriseDataProcessor, IWeatherDataProvider weatherDataProvider, ILocationDataProvider locationDataProvider, ICityRepository cityRepository)
     {
         _locationDataProcessor = locationDataProcessor;
         _sunsetSunriseDataProcessor = sunriseDataProcessor;
         _weatherDataProvider = weatherDataProvider;
         _locationDataProvider = locationDataProvider;
+        _cityRepository = cityRepository;
         _logger = logger;
     }
     
@@ -40,21 +43,31 @@ public class SolarWatchController : ControllerBase
     {
         try
         {
-            string rawLocationData = await _locationDataProvider.GetCityLocationData(city);
-            var extractedLocationInfo = _locationDataProcessor.Process(rawLocationData);
+            var extractedLocationInfo = await _cityRepository.GetLocationDataByCity(city);
+            if (extractedLocationInfo == null)
+            {
+                string rawLocationData = await _locationDataProvider.GetCityLocationData(city);
+                extractedLocationInfo = _locationDataProcessor.Process(rawLocationData);
+                await _cityRepository.AddLocationData(extractedLocationInfo);
+            }
 
-        
-            string rawSunsetSunriseData =
-                await _weatherDataProvider.GetSunsetSunriseData(extractedLocationInfo.Lat, extractedLocationInfo.Lon, date);
-            var sunsetSunriseData = _sunsetSunriseDataProcessor.Process(rawSunsetSunriseData);
-            var extractedCityInformation = new CityInformation
-            (
-                city,
-                date,
-                sunsetSunriseData.Sunrise,
-                sunsetSunriseData.Sunset
-            );
-            return Ok(extractedCityInformation);
+            var extractedCityInformation = await _cityRepository.GetCityByNameAndDate(city, date);
+            if (extractedCityInformation == null)
+            {
+                string rawSunsetSunriseData =
+                    await _weatherDataProvider.GetSunsetSunriseData(extractedLocationInfo.Lat, extractedLocationInfo.Lon, date);
+                var sunsetSunriseData = _sunsetSunriseDataProcessor.Process(rawSunsetSunriseData);
+                extractedCityInformation = new CityInformation
+                {
+                    City = city,
+                    Date = date,
+                    Sunrise = sunsetSunriseData.Sunrise,
+                    Sunset = sunsetSunriseData.Sunset
+                };
+                await _cityRepository.AddCityInformation(extractedCityInformation);
+            }
+            
+            return Ok(new CityInformation { City = city, Date = date, Sunrise = extractedCityInformation.Sunrise, Sunset = extractedCityInformation.Sunset});
         }
         catch (Exception e)
         {
