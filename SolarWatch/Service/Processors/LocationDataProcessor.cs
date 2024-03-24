@@ -12,6 +12,6 @@ public class LocationDataProcessor : ILocationDataProcessor
         double lat = json.RootElement[0].GetProperty("lat").GetDouble();
         double lon = json.RootElement[0].GetProperty("lon").GetDouble();
 
-        return new LocationData ( 0, city, lat, lon );
+        return new LocationData { City = city, Lat = lat, Lon = lon };
     }
 }

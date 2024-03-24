@@ -1,3 +1,5 @@
+using SolarWatch.Context;
+using SolarWatch.Repository;
 using SolarWatch.Service.Processors;
 using SolarWatch.Service.Providers;
 
@@ -13,7 +15,8 @@ builder.Services.AddScoped<ILocationDataProvider, LatLongApi>();
 builder.Services.AddScoped<IWeatherDataProvider, SunsetSunriseApi>();
 builder.Services.AddScoped<ILocationDataProcessor, LocationDataProcessor>();
 builder.Services.AddScoped<ISunsetSunriseDataProcessor, SunsetSunriseDataProcessor>();
-
+builder.Services.AddScoped<ICityRepository, CityRepository>();
+builder.Services.AddDbContext<SolarWatchContext>();
 
 var app = builder.Build();
 
