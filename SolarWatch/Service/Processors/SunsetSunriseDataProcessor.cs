@@ -1,7 +1,7 @@
-using System.Text.Json;
-using SolarWatch.Model;
-
 namespace SolarWatch.Service.Processors;
+
+using System.Text.Json;
+using Model;
 
 public class SunsetSunriseDataProcessor : ISunsetSunriseDataProcessor
 {
