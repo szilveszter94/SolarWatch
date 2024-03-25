@@ -1,11 +1,14 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
-using SolarWatch.Model;
-using SolarWatch.Repository;
-using SolarWatch.Service.Processors;
-using SolarWatch.Service.Providers;
+using SolarWatch.Model.CreateModels;
 
 namespace SolarWatch.Controllers;
+
+using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
+using Model;
+using Repository;
+using Service.Processors;
+using Service.Providers;
 
 public class SolarWatchController : ControllerBase
 {
@@ -33,11 +36,10 @@ public class SolarWatchController : ControllerBase
     [Route("/")]
     public IActionResult Get()
     {
-
-        return Ok(new {message = "Server is running successful."});
+        return Ok(new {message = "Server is running."});
     }
 
-    [HttpGet]
+    [HttpGet, Authorize(Roles = "Admin, User")]
     [Route("GetSunsetSunrise")]
     public async Task<ActionResult<CityInformation>> GetSunsetSunrise([Required] string city, [Required] DateTime date)
     {
@@ -73,6 +75,102 @@ public class SolarWatchController : ControllerBase
         {
             _logger.LogInformation(e, "Error getting city data.");
             return NotFound("Error getting city data");
+        }
+    }
+    
+    [HttpPost, Authorize(Roles = "Admin")]
+    [Route("AddCityInformation")]
+    public async Task<ActionResult<CityInformation>> AddCityInformation([Required] CityInfoRequest cityInformation)
+    {
+        try
+        {
+            var result = await _cityRepository.AddCityInformation(cityInformation);
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Update failed");
+        }
+    }
+    
+    [HttpPost, Authorize(Roles = "Admin")]
+    [Route("AddLocationData")]
+    public async Task<ActionResult<LocationData>> AddLocationData([Required] LocationDataRequest locationData)
+    {
+        try
+        {
+            var result = await _cityRepository.AddLocationData(locationData);
+            return Ok(result);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Update failed");
+        }
+    }
+    
+    [HttpPatch, Authorize(Roles = "Admin")]
+    [Route("UpdateCityInformation")]
+    public async Task<ActionResult<CityInformation>> UpdateCityInformation([Required] CityInformation cityInformation)
+    {
+        try
+        {
+            var updatedCity = await _cityRepository.UpdateCityInformation(cityInformation);
+            return Ok(updatedCity);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Update failed");
+        }
+    }
+    
+    [HttpPatch, Authorize(Roles = "Admin")]
+    [Route("UpdateLocationData")]
+    public async Task<ActionResult<CityInformation>> UpdateLocationData([Required] LocationData locationData)
+    {
+        try
+        {
+            var updatedLocation = await _cityRepository.UpdateLocationData(locationData);
+            return Ok(updatedLocation);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest("Update failed");
+        }
+    }
+    
+    [HttpDelete, Authorize(Roles = "Admin")]
+    [Route("DeleteCityInformation")]
+    public async Task<ActionResult<CityInformation>> DeleteCityInformation([Required] int id)
+    {
+        try
+        {
+            await _cityRepository.DeleteCityInformation(id);
+            return Ok("Delete successful.");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(e.Message);
+        }
+    }
+    
+    [HttpDelete, Authorize(Roles = "Admin")]
+    [Route("DeleteLocationData")]
+    public async Task<ActionResult<CityInformation>> DeleteLocationData([Required] int id)
+    {
+        try
+        {
+            await _cityRepository.DeleteLocationData(id);
+            return Ok("Delete successful.");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(e.Message);
         }
     }
 }
