@@ -5,10 +5,13 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <UserSecretsId>1f7f1ddf-c130-480b-86be-18a802f52cbf</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="DotNetEnv" Version="3.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.16" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.16" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.16"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.16" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.16">
