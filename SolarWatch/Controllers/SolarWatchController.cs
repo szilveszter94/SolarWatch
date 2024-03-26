@@ -10,6 +10,8 @@ using Repository;
 using Service.Processors;
 using Service.Providers;
 
+[ApiController]
+[Route("[controller]")]
 public class SolarWatchController : ControllerBase
 {
     private readonly ILogger<SolarWatchController> _logger;
@@ -30,7 +32,6 @@ public class SolarWatchController : ControllerBase
         _cityRepository = cityRepository;
         _logger = logger;
     }
-    
     
     [HttpGet]
     [Route("/")]
@@ -69,12 +70,12 @@ public class SolarWatchController : ControllerBase
                 await _cityRepository.AddCityInformation(extractedCityInformation);
             }
             
-            return Ok(new CityInformation { City = city, Date = date, Sunrise = extractedCityInformation.Sunrise, Sunset = extractedCityInformation.Sunset});
+            return Ok(new {message = "Successfully retrieved data", data = new CityInformation { City = city, Date = date, Sunrise = extractedCityInformation.Sunrise, Sunset = extractedCityInformation.Sunset}});
         }
         catch (Exception e)
         {
             _logger.LogInformation(e, "Error getting city data.");
-            return NotFound("Error getting city data");
+            return NotFound(new {message = "Error getting city data"});
         }
     }
     

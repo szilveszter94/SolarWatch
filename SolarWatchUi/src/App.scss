@@ -1,0 +1,11 @@
+@import "./Style/variables";
+
+.title {
+    color: $text-color;
+}
+
+.lead-text {
+    color: $text-color;
+    font-family: $tercier-font;
+    font-size: larger;
+}

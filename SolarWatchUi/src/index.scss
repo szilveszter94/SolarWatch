@@ -1,0 +1,15 @@
+@import "./Style/variables";
+
+html,
+body {
+  background-color: $primary-bg-color;
+  font-family: $tercier-font;
+  font-weight: 700;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  height: 100vh;
+}
