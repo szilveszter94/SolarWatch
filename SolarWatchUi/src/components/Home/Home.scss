@@ -1,0 +1,22 @@
+@import "../../Style/variables";
+
+.home-container {
+    background-image: url("../../../assets/images/bg.jpg");
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    min-height: 100%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+.home-content {
+    flex: 1;
+}
+
+.brand-name {
+    font-family: $brand-font;
+    color: $logo-color;
+}
