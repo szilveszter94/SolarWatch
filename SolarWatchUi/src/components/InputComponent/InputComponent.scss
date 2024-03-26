@@ -1,0 +1,9 @@
+@import "../../Style/variables";
+
+div .custom-input{
+    border-color: $accent-color !important;
+}
+
+div .custom-input:checked, div .custom-input:checked:focus{
+    background-color: $success-color;
+}
