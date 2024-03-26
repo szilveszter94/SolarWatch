@@ -24,6 +24,7 @@ var userSecrets = new Dictionary<string, string>
 };
 
 AddServices();
+AddCors();
 ConfigureSwagger();
 AddDbContext();
 AddAuthentication();
@@ -37,6 +38,17 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+var connection ="http://localhost:5173/";
+
+app.UseCors(b => {
+    b.WithOrigins(connection!)
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithExposedHeaders("content-type") // Allow the 'content-type' header to be exposed
+        .SetIsOriginAllowed(_ => true); // Allow any origin for CORS
+});
 
 app.UseHttpsRedirection();
 
@@ -77,6 +89,29 @@ void AddServices()
         };
 
         return new AuthenticationSeeder(roleManager, userManager, adminInfo);
+    });
+}
+
+void AddCors()
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("Development", builder =>
+        {
+            // Allow multiple HTTP methods
+            builder.WithMethods("GET", "POST", "PATCH", "DELETE", "OPTIONS")
+                .WithHeaders(
+                    "Accept",
+                    "Content-Type",
+                    "Authorization")
+                .AllowCredentials()
+                .SetIsOriginAllowed(origin =>
+                {
+                    if (string.IsNullOrWhiteSpace(origin)) return false;
+                    if (origin.ToLower().StartsWith("http://localhost")) return true;
+                    return false;
+                });
+        });
     });
 }
 
