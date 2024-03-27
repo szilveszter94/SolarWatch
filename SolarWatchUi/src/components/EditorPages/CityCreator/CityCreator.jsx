@@ -2,13 +2,16 @@ import Navbar from "../../Navbar/Navbar";
 import Footer from "../../Footer/Footer";
 import "./CityCreator.scss";
 import InputComponent from "../../InputComponent/InputComponent";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HourSelector from "./HourSelector";
 import { useContext } from "react";
 import { UserContext } from "../../../assets/context/UserContext";
 import Loading from "../../Loading/Loading";
-import { useNavigate } from "react-router-dom";
-import { convertTo12HourFormat } from "../../../utils/helperFunctions";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  convertTo12HourFormat,
+  extractFormObjectFromCityInformationData,
+} from "../../../utils/helperFunctions";
 import { fetchData } from "../../../utils/apiService";
 import SnackBar from "../../Snackbar/Snackbar";
 
@@ -32,13 +35,52 @@ const sampleCityInfo = {
 
 const CityCreator = () => {
   const [cityInfo, setCityInfo] = useState(sampleCityInfo);
+  const { id } = useParams();
   const { currentUser, loading } = useContext(UserContext);
-  const navigate = useNavigate("/");
+  const [currentPageLoading, setCurrentPageLoading] = useState(false);
+  const navigate = useNavigate();
   const [localSnackbar, setLocalSnackbar] = useState({
     open: false,
     message: "",
     type: "",
   });
+
+  useEffect(() => {
+    const loadEditObject = async () => {
+      try {
+        setCurrentPageLoading(true);
+        const response = await fetchData({
+          path: `/SolarWatch/GetCityInformationById/${id}`,
+          method: "GET",
+          body: null,
+        });
+        if (response.ok) {
+          const cityData = extractFormObjectFromCityInformationData(
+            response.data
+          );
+          setCityInfo(cityData);
+        } else {
+          setLocalSnackbar({
+            open: true,
+            message: response.message,
+            type: "error",
+          });
+        }
+      } catch (error) {
+        setLocalSnackbar({
+          open: true,
+          message: "Server not responding.",
+          type: "error",
+        });
+      }
+      setCurrentPageLoading(false);
+    };
+    if (id) {
+      loadEditObject();
+    } else {
+      setCityInfo(sampleCityInfo);
+    }
+  }, [id]);
 
   const handleChange = (e) => {
     const key = e.target.name;
@@ -63,18 +105,23 @@ const CityCreator = () => {
         sunrise: convertedSunrise,
         sunset: convertedSunset,
       };
+      id ? (body.id = id) : "";
+      const path = id
+        ? "/SolarWatch/UpdateCityInformation"
+        : "/SolarWatch/AddCityInformation";
+      const method = id ? "PATCH" : "POST";
       const response = await fetchData({
-        path: "/SolarWatch/AddCityInformation",
-        method: "POST",
+        path,
+        method,
         body,
       });
-      console.log(response);
       if (response.ok) {
         setLocalSnackbar({
           open: true,
           message: response.message,
           type: "success",
         });
+        navigate("/controlPanel");
       } else {
         setLocalSnackbar({
           open: true,
@@ -92,7 +139,7 @@ const CityCreator = () => {
     setCityInfo(sampleCityInfo);
   };
 
-  if (loading) {
+  if (loading || currentPageLoading) {
     return <Loading />;
   }
 
@@ -111,7 +158,9 @@ const CityCreator = () => {
         <form onSubmit={handleSubmit}>
           <div className="container mt-5">
             <div className="text-center my-5">
-              <h1>Create new city information</h1>
+              <h1>
+                {id ? "Edit city information" : "Create new city information"}
+              </h1>
             </div>
             <div className="row justify-content-center">
               <div className="col-md-5">

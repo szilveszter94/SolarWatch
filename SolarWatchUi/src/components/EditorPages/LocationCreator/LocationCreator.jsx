@@ -2,35 +2,81 @@ import Navbar from "../../Navbar/Navbar";
 import Footer from "../../Footer/Footer";
 import InputComponent from "../../InputComponent/InputComponent";
 import "./LocationCreator.scss";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { fetchData } from "../../../utils/apiService";
 import SnackBar from "../../Snackbar/Snackbar";
+import { useParams, useNavigate } from "react-router-dom";
+import { UserContext } from "../../../assets/context/UserContext";
+import Loading from "../../Loading/Loading";
 
 const sampleLocation = { city: "", lat: "", lon: "" };
 
 const LocationCreator = () => {
   const [locationInfo, setLocationInfo] = useState(sampleLocation);
+  const { currentUser, loading } = useContext(UserContext);
+  const [currentPageLoading, setCurrentPageLoading] = useState(false);
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [localSnackbar, setLocalSnackbar] = useState({
     open: false,
     message: "",
     type: "",
   });
 
+  useEffect(() => {
+    const loadEditObject = async () => {
+      try {
+        setCurrentPageLoading(true);
+        const response = await fetchData({
+          path: `/SolarWatch/GetLocationDataById/${id}`,
+          method: "GET",
+          body: null,
+        });
+        if (response.ok) {
+          setLocationInfo(response.data);
+        } else {
+          setLocalSnackbar({
+            open: true,
+            message: response.message,
+            type: "error",
+          });
+        }
+      } catch (error) {
+        setLocalSnackbar({
+          open: true,
+          message: "Server not responding.",
+          type: "error",
+        });
+      }
+      setCurrentPageLoading(false);
+    };
+    if (id) {
+      loadEditObject();
+    } else {
+      setLocationInfo(sampleLocation);
+    }
+  }, [id]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      id ? (locationInfo.id = id) : "";
+      const path = id
+        ? "/SolarWatch/UpdateLocationData"
+        : "/SolarWatch/AddLocationData";
+      const method = id ? "PATCH" : "POST";
       const response = await fetchData({
-        path: "/SolarWatch/AddLocationData",
-        method: "POST",
+        path: path,
+        method: method,
         body: locationInfo,
       });
-      console.log(response);
       if (response.ok) {
         setLocalSnackbar({
           open: true,
           message: response.message,
           type: "success",
         });
+        navigate("/controlPanel?option=2");
       } else {
         setLocalSnackbar({
           open: true,
@@ -53,6 +99,14 @@ const LocationCreator = () => {
     const value = e.target.value;
     setLocationInfo({ ...locationInfo, [key]: value });
   };
+
+  if (loading || currentPageLoading) {
+    return <Loading />;
+  }
+
+  if (!currentUser || (currentUser && currentUser.role !== "Admin")) {
+    navigate("/");
+  }
 
   return (
     <div className="location-creator-container vh-100">
