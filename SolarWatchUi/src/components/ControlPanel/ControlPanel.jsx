@@ -1,8 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
-
-import "./ControlPanel.scss";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { fetchData } from "../../utils/apiService";
 import Loading from "../Loading/Loading";
@@ -12,11 +11,18 @@ import { UserContext } from "../../assets/context/UserContext";
 import LocationDataTable from "./LocationDataTable/LocationDataTable";
 import SnackBar from "../Snackbar/Snackbar";
 
+import "./ControlPanel.scss";
+import { getSearchParam } from "../../utils/helperFunctions";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+
 const ControlPanel = () => {
   const [fetchedData, setFetchedData] = useState([]);
-  const [option, setOption] = useState(1);
   const [loadingCurrentPage, setLoadingCurrentPage] = useState(false);
   const { loading, currentUser } = useContext(UserContext);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const [option, setOption] = useState(getSearchParam(searchParams));
   const navigate = useNavigate();
   const [localSnackbar, setLocalSnackbar] = useState({
     open: false,
@@ -87,14 +93,16 @@ const ControlPanel = () => {
           <div className="mb-3">
             <button
               onClick={() => handleNavigate("/create/cityInformation")}
-              className="btn btn-lg btn-outline-success mx-2"
+              className="btn btn-lg btn-outline-success me-2  fw-bolder"
             >
+              <FontAwesomeIcon className="fs-4 text-info" icon={faPlusCircle} />{" "}
               Create new city
             </button>
             <button
               onClick={() => handleNavigate("/create/location")}
-              className="btn btn-lg btn-outline-success mx-2"
+              className="btn btn-lg btn-outline-success mx-2 fw-bolder"
             >
+              <FontAwesomeIcon className="fs-4 text-info" icon={faPlusCircle} />{" "}
               Create new location
             </button>
           </div>
@@ -115,12 +123,16 @@ const ControlPanel = () => {
               fetchedData={fetchedData}
               setLocalSnackbar={setLocalSnackbar}
               setFetchedData={setFetchedData}
+              navigate={navigate}
+              setLoading={setLoadingCurrentPage}
             />
           ) : (
             <LocationDataTable
               fetchedData={fetchedData}
               setLocalSnackbar={setLocalSnackbar}
               setFetchedData={setFetchedData}
+              navigate={navigate}
+              setLoading={setLoadingCurrentPage}
             />
           )}
         </div>
