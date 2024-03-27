@@ -96,6 +96,22 @@ public class SolarWatchController : ControllerBase
     }
     
     [HttpGet, Authorize(Roles = "Admin")]
+    [Route("GetCityInformationById/{id}")]
+    public async Task<ActionResult<CityInformation>> GetCityInformationById(int id)
+    {
+        try
+        {
+            var result = await _cityRepository.GetCityInformationById(id);
+            return Ok(new {message = "Information retrieved successfully", data=result});
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new {message = "Cannot get information. An error occured."});
+        }
+    }
+    
+    [HttpGet, Authorize(Roles = "Admin")]
     [Route("GetAllLocationData")]
     public async Task<ActionResult<LocationData>> GetAllLocationData()
     {
@@ -108,6 +124,22 @@ public class SolarWatchController : ControllerBase
         {
             Console.WriteLine(e);
             return BadRequest(new {message = "Cannot get locations. An error occured."});
+        }
+    }
+    
+    [HttpGet, Authorize(Roles = "Admin")]
+    [Route("GetLocationDataById/{id}")]
+    public async Task<ActionResult<LocationData>> GetLocationDataById(int id)
+    {
+        try
+        {
+            var result = await _cityRepository.GetLocationDataById(id);
+            return Ok(new {message = "Information retrieved successfully", data=result});
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new {message = "Cannot get information. An error occured."});
         }
     }
     
