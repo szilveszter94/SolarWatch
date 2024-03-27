@@ -21,3 +21,12 @@ export const formatTime = (timeString) => {
   });
   return formattedTime;
 };
+
+export const convertTo12HourFormat = (hour24, minutes) => {
+  const meridiem = hour24 >= 12 ? 'PM' : 'AM';
+  let hour12 = hour24 % 12;
+  hour12 = hour12 === 0 ? 12 : hour12;
+  const time12 = `${hour12}:${minutes.toString().padStart(2, '0')}:00 ${meridiem}`;
+
+  return time12;
+}

@@ -4,14 +4,13 @@ import { useContext } from "react";
 import { logoutUser } from "../../utils/authService";
 import { UserContext } from "../../assets/context/UserContext";
 import { SnackbarContext } from "../../assets/context/SnackbarContext";
-import { faHouse, faSun } from "@fortawesome/free-solid-svg-icons";
+import { faDashboard, faHouse, faSun } from "@fortawesome/free-solid-svg-icons";
 import "./Navbar.scss";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { currentUser, setCurrentUser } = useContext(UserContext);
   const { setSnackbar } = useContext(SnackbarContext);
-
   const handleLogout = async () => {
     const isLoggedOut = await logoutUser();
     if (isLoggedOut) {
@@ -64,6 +63,15 @@ const Navbar = () => {
                   Sunset&Sunrise <FontAwesomeIcon icon={faSun} />
                 </Link>
               </li>
+            )}
+            {currentUser && currentUser.role === "Admin" && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link ms-4 fs-3" to="/controlPanel">
+                    Control panel <FontAwesomeIcon icon={faDashboard} />
+                  </Link>
+                </li>
+              </>
             )}
           </ul>
           <div className="me-2 mb-2">

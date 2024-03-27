@@ -58,7 +58,7 @@ namespace SolarWatch.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    City = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Sunrise = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Sunset = table.Column<string>(type: "nvarchar(max)", nullable: false)
@@ -237,6 +237,12 @@ namespace SolarWatch.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CityInformations_City_Date",
+                table: "CityInformations",
+                columns: new[] { "City", "Date" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_LocationDatas_City",

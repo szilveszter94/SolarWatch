@@ -230,7 +230,7 @@ namespace SolarWatch.Migrations
 
                     b.Property<string>("City")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
@@ -244,6 +244,9 @@ namespace SolarWatch.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("City", "Date")
+                        .IsUnique();
 
                     b.ToTable("CityInformations");
                 });

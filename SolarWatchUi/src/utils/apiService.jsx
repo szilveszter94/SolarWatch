@@ -16,9 +16,12 @@ export const fetchData = async ({ path, method, body }) => {
     }
     const response = await fetch(url, options);
     const data = await response.json();
-    return { ok: true, data: data.data, message: data.message };
+    if (response.ok) {
+      return { ok: true, data: data.data, message: data.message };
+    } else {
+      return { ok: false, data: data.data, message: data.message };
+    }
   } catch (error) {
-    console.log(error);
     return { ok: false, message: "Error: The server is not responding." };
   }
 };

@@ -1,10 +1,14 @@
-using SolarWatch.Model.CreateModels;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace SolarWatch.Repository;
 
+using Model.CreateModels;
 using Microsoft.EntityFrameworkCore;
 using Context;
 using Model;
+
+
 
 public class CityRepository : ICityRepository
 {
@@ -19,21 +23,48 @@ public class CityRepository : ICityRepository
         return await _cityContext.CityInformations.FirstOrDefaultAsync(c => c.City == name && c.Date == date);
     }
     
+    public async Task<List<CityInformation>?> GetAllCityInformation()
+    {
+        return await _cityContext.CityInformations.ToListAsync();
+    }
+    
     public async Task<LocationData?> GetLocationDataByCity(string city)
     {
         return await _cityContext.LocationDatas.FirstOrDefaultAsync(c => c.City == city);
     }
     
+    public async Task<List<LocationData>?> GetAllLocationData()
+    {
+        return await _cityContext.LocationDatas.ToListAsync();
+    }
+    
     public async Task<CityInformation> AddCityInformation(CityInfoRequest cityInformation)
     {
-        var cityToCreate = new CityInformation()
+        try
         {
-            City = cityInformation.City, Date = cityInformation.Date, Sunrise = cityInformation.Sunrise,
-            Sunset = cityInformation.Sunset
-        };
-        var newCity = await _cityContext.CityInformations.AddAsync(cityToCreate);
-        await _cityContext.SaveChangesAsync();
-        return newCity.Entity;
+            var existingCity = await _cityContext.CityInformations.FirstOrDefaultAsync(c =>
+                c.City == cityInformation.City && c.Date == cityInformation.Date);
+            if (existingCity != null)
+            {
+                _cityContext.CityInformations.Entry(existingCity).CurrentValues.SetValues(cityInformation);
+                await _cityContext.SaveChangesAsync();
+                return existingCity;
+            }
+            var cityToCreate = new CityInformation()
+            {
+                City = cityInformation.City, Date = cityInformation.Date, Sunrise = cityInformation.Sunrise,
+                Sunset = cityInformation.Sunset
+            };
+            var newCity = await _cityContext.CityInformations.AddAsync(cityToCreate);
+            await _cityContext.SaveChangesAsync();
+            return newCity.Entity;
+        }
+
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw new Exception("City not created, an error occured.");
+        }
     }
     
     public async Task<CityInformation> AddCityInformation(CityInformation cityInformation)
@@ -45,13 +76,29 @@ public class CityRepository : ICityRepository
     
     public async Task<LocationData> AddLocationData(LocationDataRequest locationData)
     {
-        var locationToCreate = new LocationData()
+        try
         {
-            City = locationData.City, Lat = locationData.Lat, Lon = locationData.Lon
-        };
-        var newLocation = await _cityContext.LocationDatas.AddAsync(locationToCreate);
-        await _cityContext.SaveChangesAsync();
-        return newLocation.Entity;
+            var existingLocation = await _cityContext.LocationDatas.FirstOrDefaultAsync(l => l.City == locationData.City);
+            if (existingLocation != null)
+            {
+                _cityContext.LocationDatas.Entry(existingLocation).CurrentValues.SetValues(locationData);
+                await _cityContext.SaveChangesAsync();
+                return existingLocation;
+            }
+            var locationToCreate = new LocationData()
+            {
+                City = locationData.City, Lat = locationData.Lat, Lon = locationData.Lon
+            };
+            var newLocation = await _cityContext.LocationDatas.AddAsync(locationToCreate);
+            await _cityContext.SaveChangesAsync();
+            return newLocation.Entity;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw new Exception("Location not created. An error occured.");
+        }
+        
     }
     
     public async Task<LocationData> AddLocationData(LocationData locationData)
@@ -84,7 +131,7 @@ public class CityRepository : ICityRepository
         {
             throw new KeyNotFoundException("Failed to update. Location not found.");
         }
-            
+        
         _cityContext.CityInformations.Entry(existingCity).CurrentValues.SetValues(cityInformation);
         await _cityContext.SaveChangesAsync();
 

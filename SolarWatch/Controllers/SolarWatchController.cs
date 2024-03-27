@@ -79,6 +79,38 @@ public class SolarWatchController : ControllerBase
         }
     }
     
+    [HttpGet, Authorize(Roles = "Admin")]
+    [Route("GetAllCityInformation")]
+    public async Task<ActionResult<CityInformation>> GetAllCityInformation()
+    {
+        try
+        {
+            var result = await _cityRepository.GetAllCityInformation();
+            return Ok(new {message = "Information retrieved successfully", data=result});
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new {message = "Cannot get information. An error occured."});
+        }
+    }
+    
+    [HttpGet, Authorize(Roles = "Admin")]
+    [Route("GetAllLocationData")]
+    public async Task<ActionResult<LocationData>> GetAllLocationData()
+    {
+        try
+        {
+            var result = await _cityRepository.GetAllLocationData();
+            return Ok(new {message = "Locations retrieved successfully", data=result});
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new {message = "Cannot get locations. An error occured."});
+        }
+    }
+    
     [HttpPost, Authorize(Roles = "Admin")]
     [Route("AddCityInformation")]
     public async Task<ActionResult<CityInformation>> AddCityInformation([Required] CityInfoRequest cityInformation)
@@ -86,12 +118,12 @@ public class SolarWatchController : ControllerBase
         try
         {
             var result = await _cityRepository.AddCityInformation(cityInformation);
-            return Ok(result);
+            return Ok(new {message = "Information created successfully", data=result});
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return BadRequest("Update failed");
+            return BadRequest(new {message = e.Message});
         }
     }
     
@@ -102,12 +134,12 @@ public class SolarWatchController : ControllerBase
         try
         {
             var result = await _cityRepository.AddLocationData(locationData);
-            return Ok(result);
+            return Ok(new {message = "Location created successfully", data=result});
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return BadRequest("Update failed");
+            return BadRequest(new {message = e.Message});
         }
     }
     
@@ -150,12 +182,12 @@ public class SolarWatchController : ControllerBase
         try
         {
             await _cityRepository.DeleteCityInformation(id);
-            return Ok("Delete successful.");
+            return Ok(new {message = "Delete successful."});
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return BadRequest(e.Message);
+            return BadRequest(new {message = "Delete failed."});
         }
     }
     
@@ -166,12 +198,12 @@ public class SolarWatchController : ControllerBase
         try
         {
             await _cityRepository.DeleteLocationData(id);
-            return Ok("Delete successful.");
+            return Ok(new {message = "Delete successful."});
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return BadRequest(e.Message);
+            return BadRequest(new {message = "Delete failed."});
         }
     }
 }
