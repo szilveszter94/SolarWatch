@@ -1,4 +1,4 @@
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { fetchData } from "../../../utils/apiService";
 
@@ -7,6 +7,7 @@ const LocationDataTable = ({
   fetchedData,
   setFetchedData,
   setLocalSnackbar,
+  navigate
 }) => {
   const handleDelete = async (id) => {
     try {
@@ -39,6 +40,10 @@ const LocationDataTable = ({
     }
   };
 
+  const handleEdit = (id) => {
+    navigate(`/edit/location/${id}`)
+  };
+
   return (
     <table className="table table-dark table-striped">
       <thead>
@@ -47,6 +52,7 @@ const LocationDataTable = ({
           <th scope="col">City</th>
           <th scope="col">Latitude</th>
           <th scope="col">Longitude</th>
+          <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
       </thead>
@@ -57,6 +63,14 @@ const LocationDataTable = ({
             <td>{location.city}</td>
             <td>{location.lat}</td>
             <td>{location.lon}</td>
+            <td>
+              <button
+                onClick={() => handleEdit(location.id)}
+                className="btn btn-sm btn-success"
+              >
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+            </td>
             <td>
               <button
                 onClick={() => handleDelete(location.id)}

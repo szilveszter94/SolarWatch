@@ -1,10 +1,13 @@
 /* eslint-disable react/prop-types */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { formatDate, formatTime } from "../../../utils/helperFunctions";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { fetchData } from "../../../utils/apiService";
+import { useNavigate } from "react-router-dom";
 
 const CityInfoTable = ({ fetchedData, setLocalSnackbar, setFetchedData }) => {
+  const navigate = useNavigate();
+
   const handleDelete = async (id) => {
     try {
       const response = await fetchData({
@@ -36,6 +39,10 @@ const CityInfoTable = ({ fetchedData, setLocalSnackbar, setFetchedData }) => {
     }
   };
 
+  const handleEdit = (id) => {
+    navigate(`/edit/cityInformation/${id}`);
+  };
+
   return (
     <table className="table table-dark table-striped">
       <thead>
@@ -45,6 +52,7 @@ const CityInfoTable = ({ fetchedData, setLocalSnackbar, setFetchedData }) => {
           <th scope="col">Date</th>
           <th scope="col">Sunrise</th>
           <th scope="col">Sunset</th>
+          <th scope="col">Edit</th>
           <th scope="col">Delete</th>
         </tr>
       </thead>
@@ -56,6 +64,14 @@ const CityInfoTable = ({ fetchedData, setLocalSnackbar, setFetchedData }) => {
             <td>{formatDate(city.date)}</td>
             <td>{formatTime(city.sunrise)}</td>
             <td>{formatTime(city.sunset)}</td>
+            <td>
+              <button
+                onClick={() => handleEdit(city.id)}
+                className="btn btn-sm btn-success"
+              >
+                <FontAwesomeIcon icon={faEdit} />
+              </button>
+            </td>
             <td>
               <button
                 onClick={() => handleDelete(city.id)}
