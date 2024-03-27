@@ -17,6 +17,8 @@ function App() {
         <Route path='/sunsetSunrise' element={<SunsetSunrise />} />
         <Route path='/create/location' element={<LocationCreator />} />
         <Route path='/create/cityInformation' element={<CityCreator />} />
+        <Route path='/edit/location/:id' element={<LocationCreator />} />
+        <Route path='/edit/cityInformation/:id' element={<CityCreator />} />
         <Route path='/controlPanel' element={<ControlPanel />} />
       </Routes>
     </>
