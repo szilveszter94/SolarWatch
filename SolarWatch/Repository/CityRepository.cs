@@ -28,6 +28,11 @@ public class CityRepository : ICityRepository
         return await _cityContext.CityInformations.ToListAsync();
     }
     
+    public async Task<CityInformation?> GetCityInformationById(int id)
+    {
+        return await _cityContext.CityInformations.FirstOrDefaultAsync(c => c.Id == id);
+    }
+    
     public async Task<LocationData?> GetLocationDataByCity(string city)
     {
         return await _cityContext.LocationDatas.FirstOrDefaultAsync(c => c.City == city);
@@ -36,6 +41,11 @@ public class CityRepository : ICityRepository
     public async Task<List<LocationData>?> GetAllLocationData()
     {
         return await _cityContext.LocationDatas.ToListAsync();
+    }
+    
+    public async Task<LocationData?> GetLocationDataById(int id)
+    {
+        return await _cityContext.LocationDatas.FirstOrDefaultAsync(l => l.Id == id);
     }
     
     public async Task<CityInformation> AddCityInformation(CityInfoRequest cityInformation)
