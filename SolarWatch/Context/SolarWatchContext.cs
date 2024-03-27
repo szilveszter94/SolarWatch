@@ -19,6 +19,10 @@ public class SolarWatchContext : IdentityDbContext<IdentityUser, IdentityRole, s
     {
         base.OnModelCreating(builder);
         
+        builder.Entity<CityInformation>()
+            .HasIndex(u => new { u.City, u.Date })
+            .IsUnique();
+        
         builder.Entity<LocationData>()
             .HasIndex(u => u.City)
             .IsUnique();
