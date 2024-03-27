@@ -1,3 +1,5 @@
+using DotNetEnv;
+
 namespace SolarWatch.Service.Providers;
 
 public class LatLongApi : ILocationDataProvider
@@ -11,7 +13,8 @@ public class LatLongApi : ILocationDataProvider
     
     public async Task<string> GetCityLocationData(string city)
     {
-        var apiKey = "02f54b1400874d6c45ad6a43c9a28fcf";
+        Env.Load();
+        var apiKey = Environment.GetEnvironmentVariable("API_KEY");
         var url = $"http://api.openweathermap.org/geo/1.0/direct?q={city}&appid={apiKey}";
         using var client = new HttpClient();
 
