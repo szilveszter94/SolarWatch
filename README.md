@@ -52,7 +52,7 @@
 
 _Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
 
-1. Get API keys for the Weather API and the Sunset and Sunrise Times API.
+1. Get API keys for the Weather API and the Sunset and Sunrise Times API [https://openweathermap.org/](https://openweathermap.org/).
 2. Clone the repository:
    ```sh
    git@github.com:szilveszter94/SolarWatch.git
