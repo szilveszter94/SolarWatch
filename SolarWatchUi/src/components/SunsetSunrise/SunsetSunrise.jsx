@@ -3,12 +3,13 @@ import Navbar from "../Navbar/Navbar";
 import Footer from "../Footer/Footer";
 import "./SunsetSunrise.scss";
 import InputComponent from "../InputComponent/InputComponent";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import { fetchData } from "../../utils/apiService";
 import SnackBar from "../Snackbar/Snackbar";
 import { formatDate, formatTime } from "../../utils/helperFunctions";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../assets/context/UserContext";
+import Loading from "../Loading/Loading";
 
 const sampleData = { city: "", date: "" };
 
@@ -16,16 +17,12 @@ const SunsetSunrise = () => {
   const [info, setInfo] = useState(sampleData);
   const [cityInfo, setCityInfo] = useState(false);
   const navigate = useNavigate();
-  const { currentUser } = useContext(UserContext);
+  const { loading, currentUser } = useContext(UserContext);
   const [localSnackbar, setLocalSnackbar] = useState({
     open: false,
     message: "",
     type: "",
   });
-
-  useEffect(() => {
-    !currentUser && navigate("/authentication");
-  }, [currentUser]);
 
   const handleChange = (e) => {
     const key = e.target.name;
@@ -65,6 +62,14 @@ const SunsetSunrise = () => {
     }
     setInfo(sampleData);
   };
+
+  if (loading){
+    return <Loading />
+  }
+
+  if (!loading && !currentUser){
+    navigate("/authentication");
+  }
 
   return (
     <div className="sunset-container vh-100">
