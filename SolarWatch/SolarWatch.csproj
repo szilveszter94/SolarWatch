@@ -29,4 +29,11 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="cities.txt" />
+      <Resource Include="cities.txt">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
+    </ItemGroup>
+
 </Project>
