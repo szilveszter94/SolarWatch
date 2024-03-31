@@ -197,3 +197,4 @@ void AddDbContext()
     });
 }
 
+public partial class Program { }
