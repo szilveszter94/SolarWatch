@@ -1,4 +1,6 @@
 using SolarWatch.Model.CreateModels;
+using System;
+using System.IO;
 
 namespace SolarWatch.Controllers;
 
@@ -38,6 +40,38 @@ public class SolarWatchController : ControllerBase
     public IActionResult Get()
     {
         return Ok(new {message = "Server is running."});
+    }
+
+    [HttpGet, Authorize(Roles = "Admin")]
+    [Route("PopulateAutocompleteTable")]
+    public IActionResult PopulateAutocompleteTable()
+    {
+        try
+        {
+            _cityRepository.PopulateDatabaseWithCitiesFromFile();
+            return Ok(new {message = "Autocomplete table updated."});
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new {message = "Table not updated, an error occured."});
+        }
+    }
+    
+    [HttpGet, Authorize(Roles = "Admin, User")]
+    [Route("GetCitiesForAutocomplete")]
+    public async Task<ActionResult<List<AutocompleteCityModel>>> GetCitiesForAutocomplete([Required] string suggestion)
+    {
+        try
+        {
+            var result = await _cityRepository.GetCityBySuggestion(suggestion);
+            return Ok(new {message = "Cities retrieved successfully", data = result});
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new {message = "Cannot get cities. An error occured."});
+        }
     }
 
     [HttpGet, Authorize(Roles = "Admin, User")]
