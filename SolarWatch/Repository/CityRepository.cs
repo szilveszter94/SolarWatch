@@ -59,12 +59,23 @@ public class CityRepository : ICityRepository
     
     public async Task<CityInformation?> GetCityInformationById(int id)
     {
-        return await _cityContext.CityInformations.FirstOrDefaultAsync(c => c.Id == id);
+        var result = await _cityContext.CityInformations.FirstOrDefaultAsync(c => c.Id == id);
+        if (result != null)
+        {
+            return result;
+        }
+
+        throw new Exception("City not found");
     }
     
     public async Task<LocationData?> GetLocationDataByCity(string city)
     {
-        return await _cityContext.LocationDatas.FirstOrDefaultAsync(c => c.City == city);
+        var result = await _cityContext.LocationDatas.FirstOrDefaultAsync(c => c.City == city);
+        if (result != null)
+        {
+            return result;
+        }
+        throw new Exception("Location not found");
     }
     
     public async Task<List<LocationData>?> GetAllLocationData()
@@ -74,7 +85,12 @@ public class CityRepository : ICityRepository
     
     public async Task<LocationData?> GetLocationDataById(int id)
     {
-        return await _cityContext.LocationDatas.FirstOrDefaultAsync(l => l.Id == id);
+        var result = await _cityContext.LocationDatas.FirstOrDefaultAsync(c => c.Id == id);
+        if (result != null)
+        {
+            return result;
+        }
+        throw new Exception("Location not found");
     }
     
     public async Task<CityInformation> AddCityInformation(CityInfoRequest cityInformation)

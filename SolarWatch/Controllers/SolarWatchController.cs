@@ -141,7 +141,7 @@ public class SolarWatchController : ControllerBase
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return BadRequest(new {message = "Cannot get information. An error occured."});
+            return NotFound(new {message = "Cannot get information. An error occured."});
         }
     }
     
@@ -173,7 +173,7 @@ public class SolarWatchController : ControllerBase
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return BadRequest(new {message = "Cannot get information. An error occured."});
+            return NotFound(new {message = "Cannot get information. An error occured."});
         }
     }
     
