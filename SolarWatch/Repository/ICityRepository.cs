@@ -7,6 +7,8 @@ public interface ICityRepository
 {
     Task<CityInformation?> GetCityByNameAndDate(string name, DateTime date);
     Task<List<CityInformation>?> GetAllCityInformation();
+    Task PopulateDatabaseWithCitiesFromFile();
+    Task<List<AutocompleteCityModel>> GetCityBySuggestion(string suggestion);
     Task<CityInformation?> GetCityInformationById(int id);
     Task<LocationData?> GetLocationDataByCity(string city);
     Task<List<LocationData>?> GetAllLocationData();

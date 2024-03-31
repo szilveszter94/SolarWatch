@@ -1,6 +1,3 @@
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-
 namespace SolarWatch.Repository;
 
 using Model.CreateModels;
@@ -26,6 +23,38 @@ public class CityRepository : ICityRepository
     public async Task<List<CityInformation>?> GetAllCityInformation()
     {
         return await _cityContext.CityInformations.ToListAsync();
+    }
+
+    public async Task<List<AutocompleteCityModel>> GetCityBySuggestion(string suggestion)
+    {
+        var formattedSuggestion = suggestion.ToLower();
+        return _cityContext.AutocompleteCityModels.Where(c => c.City.ToLower().Contains(formattedSuggestion)).ToList();
+    }
+
+    public async Task PopulateDatabaseWithCitiesFromFile()
+    {
+        string filePath = "cities.txt";
+        if (!_cityContext.AutocompleteCityModels.Any())
+        {
+            if (File.Exists(filePath))
+            {
+                string[] lines = File.ReadAllLines(filePath);
+
+                foreach (string line in lines)
+                {
+                    var autocompleteModel = new AutocompleteCityModel() { City = line };
+                    
+                    _cityContext.AutocompleteCityModels.Add(autocompleteModel);
+                }
+                await _cityContext.SaveChangesAsync();
+            }
+            else
+            {
+                Console.WriteLine("File not found.");
+            }
+        }
+
+        Console.WriteLine("Database table is not empty. Skipping population.");
     }
     
     public async Task<CityInformation?> GetCityInformationById(int id)
