@@ -11,6 +11,8 @@ public class SolarWatchContext : IdentityDbContext<IdentityUser, IdentityRole, s
     public DbSet<LocationData> LocationDatas { get; set; }
     public DbSet<CityInformation> CityInformations { get; set; }
     
+    public DbSet<AutocompleteCityModel> AutocompleteCityModels { get; set; }
+    
     public SolarWatchContext(DbContextOptions<SolarWatchContext> options) : base(options)
     {
     }
