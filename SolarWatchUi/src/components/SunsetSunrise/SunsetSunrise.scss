@@ -15,3 +15,9 @@
 .sunset-content {
     flex: 1;
 }
+
+.Mui-focused .MuiInputLabel-outlined {
+    color: $text-color !important;
+    font-weight: bold;
+    text-shadow: 2px 2px 1px rgb(0, 0, 0);
+}

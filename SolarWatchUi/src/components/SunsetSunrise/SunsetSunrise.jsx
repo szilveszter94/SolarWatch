@@ -10,12 +10,15 @@ import { formatDate, formatTime } from "../../utils/helperFunctions";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../assets/context/UserContext";
 import Loading from "../Loading/Loading";
+import TextField from "@mui/material/TextField";
+import Autocomplete from "@mui/material/Autocomplete";
 
 const sampleData = { city: "", date: "" };
 
 const SunsetSunrise = () => {
   const [info, setInfo] = useState(sampleData);
   const [cityInfo, setCityInfo] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
   const { loading, currentUser } = useContext(UserContext);
   const [localSnackbar, setLocalSnackbar] = useState({
@@ -24,11 +27,30 @@ const SunsetSunrise = () => {
     type: "",
   });
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const key = e.target.name;
     const value = e.target.value;
     setInfo({ ...info, [key]: value });
+    if (value.length > 2) {
+      try {
+        const response = await fetchData({
+          path: `/SolarWatch/GetCitiesForAutocomplete?suggestion=${value}`,
+          method: "GET",
+          body: null,
+        });
+        setSuggestions(response.data);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    } else {
+      setSuggestions([]);
+    }
   };
+
+  const handleSuggestionChange = (e) =>{
+    const value = e.target.textContent;
+    setInfo({ ...info, city: value });
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,11 +85,11 @@ const SunsetSunrise = () => {
     setInfo(sampleData);
   };
 
-  if (loading){
-    return <Loading />
+  if (loading) {
+    return <Loading />;
   }
 
-  if (!loading && !currentUser){
+  if (!loading && !currentUser) {
     navigate("/authentication");
   }
 
@@ -85,12 +107,29 @@ const SunsetSunrise = () => {
               <div className="col-md-6">
                 <form onSubmit={handleSubmit}>
                   <div className="col-md-10">
-                    <InputComponent
-                      name="city"
-                      value={info.city}
-                      placeholder="City"
-                      type="text"
-                      onChange={handleChange}
+                    <label
+                      htmlFor="city"
+                      className="form-label text-light fs-4"
+                    >
+                      City:
+                    </label>
+                    <Autocomplete
+                      disablePortal
+                      className="bg-light text-dark"
+                      isOptionEqualToValue={(option, value) => option.city === value.city}
+                      options={suggestions}
+                      onChange={handleSuggestionChange}
+                      getOptionLabel={(option) => (option ? option.city : "")}
+                      renderInput={(params) => (
+                        <TextField
+                          id="city"
+                          name="city"
+                          value={info.city}
+                          onChange={handleChange}
+                          {...params}
+                          label="City"
+                        />
+                      )}
                     />
                     <InputComponent
                       name="date"
