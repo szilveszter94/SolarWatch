@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using NUnit.Framework;
 using SolarWatch.Controllers;
 using SolarWatch.Model;
+using SolarWatch.Model.SolarWatchRepositoryResponseModels;
 using SolarWatch.Repository;
 using SolarWatch.Service.Processors;
 using SolarWatch.Service.Providers;
@@ -115,9 +117,14 @@ public class SolarWatchControllerTests
         var result = await _controller.GetSunsetSunrise(City, _date);
         // Assert
         
+        Console.WriteLine($"Hello {result.Value}");
+        // Assert.IsInstanceOf(typeof(OkObjectResult), result.Result);
         Assert.IsInstanceOf(typeof(OkObjectResult), result.Result);
-        var res = ((OkObjectResult)result.Result).Value as CityInformation;
-        Assert.That(res, Is.EqualTo(expectedFinalResult));
+        var okResult = (OkObjectResult)result.Result;
+        Assert.IsNotNull(okResult.Value);
+        Assert.IsInstanceOf(typeof(OkCityInformationResponse), okResult.Value);
+        var res = (OkCityInformationResponse)okResult.Value;
+        Assert.AreEqual(expectedFinalResult, res.Data);
     }
     
     [Test]
@@ -134,9 +141,11 @@ public class SolarWatchControllerTests
         // Act
         var result = await _controller.GetSunsetSunrise(City, _date);
         // Assert
-        
         Assert.IsInstanceOf(typeof(OkObjectResult), result.Result);
-        var res = ((OkObjectResult)result.Result).Value as CityInformation;
-        Assert.That(res, Is.EqualTo(expectedFinalResult));
+        var okResult = (OkObjectResult)result.Result;
+        Assert.IsNotNull(okResult.Value);
+        Assert.IsInstanceOf(typeof(OkCityInformationResponse), okResult.Value);
+        var res = (OkCityInformationResponse)okResult.Value;
+        Assert.AreEqual(expectedFinalResult, res.Data);
     }
 }
