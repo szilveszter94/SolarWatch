@@ -28,7 +28,26 @@ public class CityRepository : ICityRepository
     public async Task<List<AutocompleteCityModel>> GetCityBySuggestion(string suggestion)
     {
         var formattedSuggestion = suggestion.ToLower();
-        return _cityContext.AutocompleteCityModels.Where(c => c.City.ToLower().Contains(formattedSuggestion)).ToList();
+        return _cityContext.AutocompleteCityModels.Where(c => c.Label.ToLower().Contains(formattedSuggestion)).ToList();
+    }
+    
+    public async Task<List<AutocompleteCityModel>> GetAllSuggestions()
+    {
+        return await _cityContext.AutocompleteCityModels.ToListAsync();
+    }
+
+    public async Task<AutocompleteCityModel?> AddAutocompleteSuggestion(string suggestion)
+    {
+        var existingSuggestion = await _cityContext.AutocompleteCityModels.FirstOrDefaultAsync(c => c.Label == suggestion);
+        if (existingSuggestion == null)
+        {
+            var newSuggestion = new AutocompleteCityModel() { Label = suggestion };
+            var newCity = await _cityContext.AutocompleteCityModels.AddAsync(newSuggestion);
+            await _cityContext.SaveChangesAsync();
+            return newCity.Entity;
+        }
+
+        return null;
     }
 
     public async Task PopulateDatabaseWithCitiesFromFile()
@@ -42,7 +61,7 @@ public class CityRepository : ICityRepository
 
                 foreach (string line in lines)
                 {
-                    var autocompleteModel = new AutocompleteCityModel() { City = line };
+                    var autocompleteModel = new AutocompleteCityModel() { Label = line };
                     
                     _cityContext.AutocompleteCityModels.Add(autocompleteModel);
                 }
@@ -70,12 +89,7 @@ public class CityRepository : ICityRepository
     
     public async Task<LocationData?> GetLocationDataByCity(string city)
     {
-        var result = await _cityContext.LocationDatas.FirstOrDefaultAsync(c => c.City == city);
-        if (result != null)
-        {
-            return result;
-        }
-        throw new Exception("Location not found");
+        return await _cityContext.LocationDatas.FirstOrDefaultAsync(c => c.City == city);
     }
     
     public async Task<List<LocationData>?> GetAllLocationData()
@@ -158,9 +172,15 @@ public class CityRepository : ICityRepository
     
     public async Task<LocationData> AddLocationData(LocationData locationData)
     {
-        var newLocation = await _cityContext.LocationDatas.AddAsync(locationData);
-        await _cityContext.SaveChangesAsync();
-        return newLocation.Entity;
+        var existingLocation = await _cityContext.LocationDatas.FirstOrDefaultAsync(l => l.City == locationData.City);
+        if (existingLocation == null)
+        {
+            var newLocation = await _cityContext.LocationDatas.AddAsync(locationData);
+            await _cityContext.SaveChangesAsync();
+            return newLocation.Entity;
+        }
+
+        return existingLocation;
     }
     
     public async Task<LocationData> UpdateLocationData(LocationData locationData)
