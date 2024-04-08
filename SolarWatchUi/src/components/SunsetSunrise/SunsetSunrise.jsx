@@ -13,10 +13,9 @@ import Loading from "../Loading/Loading";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 
-const sampleData = { city: "", date: "" };
-
 const SunsetSunrise = () => {
-  const [info, setInfo] = useState(sampleData);
+  const [cityName, setCityName] = useState("");
+  const [date, setDate] = useState("");
   const [cityInfo, setCityInfo] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
@@ -27,35 +26,38 @@ const SunsetSunrise = () => {
     type: "",
   });
 
-  const handleChange = async (e) => {
-    const key = e.target.name;
+  const handleDateChange = (e) => {
     const value = e.target.value;
-    setInfo({ ...info, [key]: value });
-    if (value.length > 2) {
+    setDate(value);
+  };
+
+  const handleInputChange = async (city) => {
+    setCityName(city);
+    if (city.length > 2) {
       try {
         const response = await fetchData({
-          path: `/SolarWatch/GetCitiesForAutocomplete?suggestion=${value}`,
+          path: `/SolarWatch/GetCitiesForAutocomplete?suggestion=${city}`,
           method: "GET",
           body: null,
         });
-        setSuggestions(response.data);
+        const duplicatedCity = response.data.find(i => i.label == city);
+        if (duplicatedCity){
+          setSuggestions(response.data);
+        } else {
+          setSuggestions([...response.data, {id: "userInput", label: city}]);
+        }
       } catch (error) {
         console.error("Error fetching suggestions:", error);
       }
     } else {
-      setSuggestions([]);
+      setSuggestions([{id: "userInput", label: city}]);
     }
   };
-
-  const handleSuggestionChange = (e) =>{
-    const value = e.target.textContent;
-    setInfo({ ...info, city: value });
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const path = `/SolarWatch/GetSunsetSunrise?city=${info.city}&date=${info.date}`;
+      const path = `/SolarWatch/GetSunsetSunrise?city=${cityName}&date=${date}`;
       const response = await fetchData({
         path: path,
         method: "GET",
@@ -82,7 +84,8 @@ const SunsetSunrise = () => {
         type: "error",
       });
     }
-    setInfo(sampleData);
+    setCityName("");
+    setDate("");
   };
 
   if (loading) {
@@ -114,29 +117,30 @@ const SunsetSunrise = () => {
                       City:
                     </label>
                     <Autocomplete
-                      disablePortal
                       className="bg-light text-dark"
-                      isOptionEqualToValue={(option, value) => option.city === value.city}
+                      disablePortal
+                      id="combo-box-demo"
+                      value={cityName}
                       options={suggestions}
-                      onChange={handleSuggestionChange}
-                      getOptionLabel={(option) => (option ? option.city : "")}
+                      isOptionEqualToValue={(option, value) => () =>
+                        option.id == value.id}
+                      onInputChange={(e, value) => handleInputChange(value)}
                       renderInput={(params) => (
                         <TextField
-                          id="city"
-                          name="city"
-                          value={info.city}
-                          onChange={handleChange}
                           {...params}
+                          required
+                          value={cityName}
+                          onChange={(e) => handleInputChange(e.target.value)}
                           label="City"
                         />
                       )}
                     />
                     <InputComponent
                       name="date"
-                      value={info.date}
+                      value={date}
                       placeholder="Date"
                       type="date"
-                      onChange={handleChange}
+                      onChange={handleDateChange}
                     />
                     <button
                       type="submit"
