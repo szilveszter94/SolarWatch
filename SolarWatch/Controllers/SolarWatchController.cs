@@ -40,22 +40,6 @@ public class SolarWatchController : ControllerBase
     {
         return Ok(new MessageResponse("Server is running."));
     }
-
-    [HttpGet, Authorize(Roles = "Admin")]
-    [Route("PopulateAutocompleteTable")]
-    public IActionResult PopulateAutocompleteTable()
-    {
-        try
-        {
-            _cityRepository.PopulateDatabaseWithCitiesFromFile();
-            return Ok(new MessageResponse("Autocomplete table updated."));
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return BadRequest(new MessageResponse("Table not updated, an error occured."));
-        }
-    }
     
     [HttpGet, Authorize(Roles = "Admin, User")]
     [Route("GetCitiesForAutocomplete")]
@@ -86,8 +70,8 @@ public class SolarWatchController : ControllerBase
                 extractedLocationInfo = _locationDataProcessor.Process(rawLocationData);
                 await _cityRepository.AddLocationData(extractedLocationInfo);
             }
-
-            var extractedCityInformation = await _cityRepository.GetCityByNameAndDate(city, date);
+            
+            var extractedCityInformation = await _cityRepository.GetCityByNameAndDate(extractedLocationInfo.City, date);
             if (extractedCityInformation == null)
             {
                 string rawSunsetSunriseData =
@@ -95,20 +79,16 @@ public class SolarWatchController : ControllerBase
                 var sunsetSunriseData = _sunsetSunriseDataProcessor.Process(rawSunsetSunriseData);
                 extractedCityInformation = new CityInformation
                 {
-                    City = city,
+                    City = extractedLocationInfo.City,
                     Date = date,
                     Sunrise = sunsetSunriseData.Sunrise,
                     Sunset = sunsetSunriseData.Sunset
                 };
                 await _cityRepository.AddCityInformation(extractedCityInformation);
             }
-
+            await _cityRepository.AddAutocompleteSuggestion(extractedCityInformation.City);
             return Ok(new OkCityInformationResponse("Successfully retrieved data",
-                new CityInformation
-                    {
-                    City = city, Date = date, Sunrise = extractedCityInformation.Sunrise,
-                    Sunset = extractedCityInformation.Sunset
-                }));
+                extractedCityInformation));
         }
         catch (Exception e)
         {
