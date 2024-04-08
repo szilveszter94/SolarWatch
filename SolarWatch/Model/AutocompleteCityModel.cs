@@ -3,7 +3,7 @@ namespace SolarWatch.Model;
 public class AutocompleteCityModel
 {
     public int Id { get; set; }
-    public string City { get; set; }
+    public string Label { get; set; }
     
     public override bool Equals(object obj)
     {
@@ -14,6 +14,6 @@ public class AutocompleteCityModel
 
         var other = (AutocompleteCityModel)obj;
         return Id == other.Id &&
-               City == other.City;
+               Label == other.Label;
     }
 };

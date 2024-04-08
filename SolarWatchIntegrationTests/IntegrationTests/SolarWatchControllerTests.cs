@@ -47,7 +47,7 @@ public class SolarWatchControllerTests
     {
         // Arrange
         var client = _factory.CreateClient();
-        var expectedResult = new AutocompleteCityModel() { City = "Budapest", Id = 1 };
+        var expectedResult = new AutocompleteCityModel() { Label = "Budapest", Id = 1 };
         // Act
         var response = await client.GetAsync(url);
 

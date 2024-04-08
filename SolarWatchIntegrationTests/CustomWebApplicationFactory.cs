@@ -54,8 +54,8 @@ public class CustomWebApplicationFactory<TProgram>
             var serviceProvider = scope.ServiceProvider;
             var context = serviceProvider.GetRequiredService<SolarWatchContext>();
             
-            context.AutocompleteCityModels.Add(new AutocompleteCityModel() { City = "Budapest", Id = 1 });
-            context.AutocompleteCityModels.Add(new AutocompleteCityModel() { City = "Debrecen", Id = 2 });
+            context.AutocompleteCityModels.Add(new AutocompleteCityModel() { Label = "Budapest", Id = 1 });
+            context.AutocompleteCityModels.Add(new AutocompleteCityModel() { Label = "Debrecen", Id = 2 });
             context.LocationDatas.Add(new LocationData() { City = "Budapest", Id = 1, Lat = 47, Lon = 21 });
             context.CityInformations.Add(new CityInformation() { City = "Budapest", Id = 1, Date = new DateTime(2024,03, 31), Sunrise = "4 AM", Sunset = "6 PM"});
             context.SaveChanges();
