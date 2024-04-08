@@ -8,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using SolarWatch.Context;
 using SolarWatch.Repository;
 using SolarWatch.Service.Authentication;
+using SolarWatch.Service.Autocomplete;
 using SolarWatch.Service.Processors;
 using SolarWatch.Service.Providers;
 using SolarWatch.Service.Token;
@@ -60,8 +61,10 @@ app.MapControllers();
 
 using var scope = app.Services.CreateScope();
 var authenticationSeeder = scope.ServiceProvider.GetRequiredService<AuthenticationSeeder>();
+var autocompleteSeeder = scope.ServiceProvider.GetRequiredService<IAutocompleteSuggestionSeeder>();
 authenticationSeeder.AddRoles();
 authenticationSeeder.AddAdmin();
+autocompleteSeeder.PupulateAutocompleteTable();
 
 app.Run();
 
@@ -90,6 +93,7 @@ void AddServices()
 
         return new AuthenticationSeeder(roleManager, userManager, adminInfo);
     });
+    builder.Services.AddScoped<IAutocompleteSuggestionSeeder, AutocompleteSuggestionSeeder>();
 }
 
 void AddCors()
