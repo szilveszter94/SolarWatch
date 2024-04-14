@@ -15,7 +15,10 @@ import {
 import moment from "moment";
 import { useEffect, useState } from "react";
 import "chartjs-adapter-moment";
-import { convertTimeToDateTime } from "../../../utils/helperFunctions";
+import {
+  convertTimeToDateTime,
+  fixInCorrectDate,
+} from "../../../utils/helperFunctions";
 
 ChartJS.register(
   CategoryScale,
@@ -54,19 +57,21 @@ const sunsetDataRaw = {
   ],
 };
 
+
 const SunsetSunriseChart = ({ props }) => {
   const [sunsetData, setSunsetData] = useState(sunsetDataRaw);
+  const [sunriseData, setSunriseData] = useState(sunriseDataRaw);
   const [minSunset, setMinSunset] = useState(new Date());
   const [minSunrise, setMinSunrise] = useState(new Date());
-  const [sunriseData, setSunriseData] = useState(sunriseDataRaw);
+
   useEffect(() => {
     const labels = [];
     const sunriseDataExtracted = [];
     const sunsetDataExtracted = [];
     props.forEach((item) => {
       labels.push(moment(item.date).format("MMM DD"));
-      sunriseDataExtracted.push(convertTimeToDateTime(item.sunrise, item.date));
-      sunsetDataExtracted.push(convertTimeToDateTime(item.sunset, item.date));
+      sunriseDataExtracted.push(convertTimeToDateTime(item.sunrise, props[0].date));
+      sunsetDataExtracted.push(convertTimeToDateTime(item.sunset, props[0].date));
     });
     const minimumSunriseDate = new Date(
       Math.min.apply(null, sunriseDataExtracted)
@@ -74,6 +79,7 @@ const SunsetSunriseChart = ({ props }) => {
     const minimumSunsetDate = new Date(
       Math.min.apply(null, sunsetDataExtracted)
     );
+
     setMinSunrise(minimumSunriseDate);
     setMinSunset(minimumSunsetDate);
     setSunsetData({
@@ -100,9 +106,9 @@ const SunsetSunriseChart = ({ props }) => {
 
   const getOptions = (isSunset) => {
     const minimumValue = isSunset
-      ? moment(minSunset).subtract(15, "minutes").format("YYYY-MM-DD HH:mm:ss")
+      ? moment(minSunset).subtract(15, "seconds").format("YYYY-MM-DD HH:mm:ss")
       : moment(minSunrise)
-          .subtract(15, "minutes")
+          .subtract(15, "seconds")
           .format("YYYY-MM-DD HH:mm:ss");
 
     return {
@@ -113,8 +119,15 @@ const SunsetSunriseChart = ({ props }) => {
           labels: {
             color: "white",
             font: {
-                size: 28
-            }
+              size: 28,
+            },
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: function (tooltipItem) {
+              return fixInCorrectDate(tooltipItem);
+            },
           },
         },
       },
@@ -134,6 +147,9 @@ const SunsetSunriseChart = ({ props }) => {
               size: 18,
             },
           },
+          grid: {
+            color: "rgba(255, 255, 255, 0.2)",
+          },
           min: minimumValue,
         },
         x: {
@@ -143,6 +159,9 @@ const SunsetSunriseChart = ({ props }) => {
               size: 18,
             },
           },
+          grid: {
+            color: "rgba(255, 255, 255, 0.2)",
+          },
         },
       },
     };
@@ -150,12 +169,16 @@ const SunsetSunriseChart = ({ props }) => {
 
   return (
     <div className="container text-light">
-      <div className="mb-5">
-        <Line options={getOptions(false)} data={sunriseData} />
+      <div>
+        <Line className="d-flex" options={getOptions(true)} data={sunsetData} />
       </div>
       <hr />
-      <div>
-        <Line options={getOptions(true)} data={sunsetData} />
+      <div className="mb-5">
+        <Line
+          className="d-flex"
+          options={getOptions(false)}
+          data={sunriseData}
+        />
       </div>
     </div>
   );

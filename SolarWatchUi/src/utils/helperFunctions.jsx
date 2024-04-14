@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const formatDate = (dateString) => {
   const date = new Date(dateString);
 
@@ -11,9 +13,9 @@ export const formatDate = (dateString) => {
   return formattedDate;
 };
 
-export const convertTimeToDateTime = (timeString, dateObj) => {
-  const date = dateObj.split("T")[0];
-  return new Date(`${date} ` + timeString);
+export const convertTimeToDateTime = (timeString, date) => {
+  const extractedDate = date.split("T")[0];
+  return new Date(`${extractedDate} ` + timeString);
 };
 
 export const formatTime = (timeString) => {
@@ -69,4 +71,11 @@ export const getSearchParam = (searchParams) => {
     return value;
   }
   return 1;
+};
+
+export const fixInCorrectDate = (tool) => {
+  const date = tool.dataset.data[tool.dataIndex];
+  const index = tool.dataIndex;
+  let newDate = moment(date).add(index, "day");
+  return newDate;
 };
