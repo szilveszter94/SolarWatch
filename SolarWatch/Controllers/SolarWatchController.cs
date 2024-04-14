@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using SolarWatch.Model.CreateModels;
 using SolarWatch.Model.SolarWatchRepositoryResponseModels;
 
@@ -59,36 +60,18 @@ public class SolarWatchController : ControllerBase
 
     [HttpGet, Authorize(Roles = "Admin, User")]
     [Route("GetSunsetSunrise")]
-    public async Task<ActionResult<OkCityInformationListResponse>> GetSunsetSunrise([Required] string city, [Required] DateTime date)
+    public async Task<ActionResult<OkCityInformationListResponse>> GetSunsetSunrise([Required] string city, [Required] DateTime date, int forecast = 1)
     {
         try
         {
-            var extractedLocationInfo = await _cityRepository.GetLocationDataByCity(city);
-            if (extractedLocationInfo == null)
+            var results = new List<CityInformation>();
+            for (int i = 0; i < forecast; i++)
             {
-                string rawLocationData = await _locationDataProvider.GetCityLocationData(city);
-                extractedLocationInfo = _locationDataProcessor.Process(rawLocationData);
-                await _cityRepository.AddLocationData(extractedLocationInfo);
+                var newDate = date.AddDays(i);
+                var result = await FetchCityInformation(city, newDate);
+                results.Add(result);
             }
-            
-            var extractedCityInformation = await _cityRepository.GetCityByNameAndDate(extractedLocationInfo.City, date);
-            if (extractedCityInformation == null)
-            {
-                string rawSunsetSunriseData =
-                    await _weatherDataProvider.GetSunsetSunriseData(extractedLocationInfo.Lat, extractedLocationInfo.Lon, date);
-                var sunsetSunriseData = _sunsetSunriseDataProcessor.Process(rawSunsetSunriseData);
-                extractedCityInformation = new CityInformation
-                {
-                    City = extractedLocationInfo.City,
-                    Date = date,
-                    Sunrise = sunsetSunriseData.Sunrise,
-                    Sunset = sunsetSunriseData.Sunset
-                };
-                await _cityRepository.AddCityInformation(extractedCityInformation);
-            }
-            await _cityRepository.AddAutocompleteSuggestion(extractedCityInformation.City);
-            return Ok(new OkCityInformationResponse("Successfully retrieved data",
-                extractedCityInformation));
+            return Ok(new OkCityInformationListResponse("Successfully retrieved data", results.ToList())); 
         }
         catch (Exception e)
         {
@@ -255,5 +238,33 @@ public class SolarWatchController : ControllerBase
             Console.WriteLine(e);
             return BadRequest(new MessageResponse("Delete failed."));
         }
+    }
+    
+    private async Task<CityInformation> FetchCityInformation(string city, DateTime date)
+    {
+        var extractedLocationInfo = await _cityRepository.GetLocationDataByCity(city);
+        if (extractedLocationInfo == null)
+        {
+            string rawLocationData = await _locationDataProvider.GetCityLocationData(city);
+            extractedLocationInfo = _locationDataProcessor.Process(rawLocationData);
+            await _cityRepository.AddLocationData(extractedLocationInfo);
+        }
+
+        var extractedCityInformation = await _cityRepository.GetCityByNameAndDate(extractedLocationInfo.City, date);
+        if (extractedCityInformation == null)
+        {
+            string rawSunsetSunriseData = await _weatherDataProvider.GetSunsetSunriseData(extractedLocationInfo.Lat, extractedLocationInfo.Lon, date);
+            var sunsetSunriseData = _sunsetSunriseDataProcessor.Process(rawSunsetSunriseData);
+            extractedCityInformation = new CityInformation
+            {
+                City = extractedLocationInfo.City,
+                Date = date,
+                Sunrise = sunsetSunriseData.Sunrise,
+                Sunset = sunsetSunriseData.Sunset
+            };
+            await _cityRepository.AddCityInformation(extractedCityInformation);
+        }
+        await _cityRepository.AddAutocompleteSuggestion(extractedCityInformation.City);
+        return extractedCityInformation;
     }
 }
