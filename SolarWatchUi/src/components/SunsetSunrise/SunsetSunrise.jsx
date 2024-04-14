@@ -26,6 +26,7 @@ const SunsetSunrise = () => {
   const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
   const { loading, currentUser } = useContext(UserContext);
+  const [pageLoading, setPageLoading] = useState(false);
   const [localSnackbar, setLocalSnackbar] = useState({
     open: false,
     message: "",
@@ -67,6 +68,7 @@ const SunsetSunrise = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setPageLoading(true);
     try {
       const path = `/SolarWatch/GetSunsetSunrise?city=${cityName}&date=${date}&forecast=${forecast}`;
       const response = await fetchData({
@@ -96,10 +98,12 @@ const SunsetSunrise = () => {
       });
     }
     setCityName("");
+    setForecast(1);
     setDate("");
+    setPageLoading(false);
   };
 
-  if (loading) {
+  if (loading || pageLoading) {
     return <Loading />;
   }
 
@@ -114,7 +118,7 @@ const SunsetSunrise = () => {
         setOpen={() => setLocalSnackbar({ ...localSnackbar, open: false })}
       />
       <Navbar />
-      <div className="sunset-content">
+      <div className="sunset-content mb-5">
         <div className="container mt-5">
           <div className="text-center">
             <div className="row">
@@ -154,10 +158,10 @@ const SunsetSunrise = () => {
                       onChange={handleDateChange}
                     />
                     <label
-                      className="form-label text-light fs-4"
+                      className="form-label text-light mt-1 fs-4"
                       htmlFor="forecast"
                     >
-                      Forecast (optional)
+                      Multiple days (optional)
                     </label>
                     <select
                       name="forecast"
@@ -179,7 +183,7 @@ const SunsetSunrise = () => {
               </div>
               <div className="col-md-6">
                 {cityInfo && (
-                  <div className="text-light">
+                  <div className="text-light mt-4">
                     <div>
                       <h1 className="mb-2">{cityInfo[0].city}</h1>
                       <h3>{formatDate(cityInfo[0].date)}</h3>
@@ -191,9 +195,9 @@ const SunsetSunrise = () => {
               </div>
             </div>
             {cityInfo && cityInfo.length > 1 && (
-              <div className="container">
+              <div className="container mt-5">
                 <div className="text-light my-4">
-                  <h2 className="display-4">Sunrise and Sunset Chart</h2>
+                  <h2 className="display-5">Sunrise And Sunset Chart For {cityInfo[0].city}</h2>
                 </div>
                 <div className="border rounded my-4 p-5">
                   <SunsetSunriseChart props={cityInfo} />
