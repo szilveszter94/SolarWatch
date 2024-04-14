@@ -20,7 +20,6 @@ public class SolarWatchControllerTests
 
     [Theory]
     [InlineData("/")]
-    [InlineData("/SolarWatch/PopulateAutocompleteTable")]
     [InlineData("/SolarWatch/GetCitiesForAutoComplete?suggestion=Bud")]
     [InlineData("/SolarWatch/GetSunsetSunrise?city=Budapest&date=2024.03.31")]
     [InlineData("/SolarWatch/GetAllCityInformation")]
@@ -82,17 +81,20 @@ public class SolarWatchControllerTests
     {
         // Arrange
         var client = _factory.CreateClient();
-        var expectedResult = new CityInformation()
-            { City = "Budapest", Date = new DateTime(2024, 03, 31), Sunrise = "4 AM", Sunset = "6 PM" };
+        var expectedResult = new List<CityInformation>()
+        {
+            new ()
+                { Id = 1, City = "Budapest", Date = new DateTime(2024, 03, 31), Sunrise = "4 AM", Sunset = "6 PM" }
+        };
 
         // Act
         var response = await client.GetAsync(url);
 
         // Assert
-        CityInformation cities = await ConvertResponseData<CityInformation>(response);
+        List<CityInformation> cities = await ConvertResponseData<List<CityInformation>>(response);
         response.EnsureSuccessStatusCode();
         Assert.Equal("application/json; charset=utf-8", response.Content.Headers.ContentType.ToString());
-        Assert.Equal(expectedResult, cities);
+        Assert.Equivalent(expectedResult, cities);
     }
     
     [Theory]

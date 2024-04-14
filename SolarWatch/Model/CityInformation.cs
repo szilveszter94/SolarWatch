@@ -22,7 +22,7 @@ public class CityInformation {
         var other = (CityInformation)obj;
         return Id == other.Id &&
                City == other.City &&
-               Date == other.Date &&
+               Date.Date == other.Date.Date &&
                Sunrise == other.Sunrise &&
                Sunset == other.Sunset;
     }

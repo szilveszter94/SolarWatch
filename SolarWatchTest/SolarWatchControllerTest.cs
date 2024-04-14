@@ -104,7 +104,8 @@ public class SolarWatchControllerTests
         
         var expectedLocationData = new LocationData { City = City, Lat = 100, Lon = -50 };
         var expectedSunriseSunsetData = new SunsetSunriseData(sunrise, sunset);
-        var expectedFinalResult = new CityInformation { City = City, Date = _date, Sunrise = sunrise,Sunset = sunset};
+        var expectedFinalResult = new List<CityInformation>
+            { new () { City = City, Date = _date, Sunrise = sunrise, Sunset = sunset } };
         _cityRepositoryMock.Setup((x) => x.GetLocationDataByCity(It.IsAny<string>())).ReturnsAsync((LocationData)null);
         _cityRepositoryMock.Setup((x) => x.GetCityByNameAndDate(It.IsAny<string>(), It.IsAny<DateTime>()))
             .ReturnsAsync((CityInformation)null);
@@ -117,14 +118,13 @@ public class SolarWatchControllerTests
         var result = await _controller.GetSunsetSunrise(City, _date);
         // Assert
         
-        Console.WriteLine($"Hello {result.Value}");
         // Assert.IsInstanceOf(typeof(OkObjectResult), result.Result);
         Assert.IsInstanceOf(typeof(OkObjectResult), result.Result);
         var okResult = (OkObjectResult)result.Result;
         Assert.IsNotNull(okResult.Value);
-        Assert.IsInstanceOf(typeof(OkCityInformationResponse), okResult.Value);
-        var res = (OkCityInformationResponse)okResult.Value;
-        Assert.AreEqual(expectedFinalResult, res.Data);
+        Assert.IsInstanceOf(typeof(OkCityInformationListResponse), okResult.Value);
+        var res = (OkCityInformationListResponse)okResult.Value;
+        Assert.That(expectedFinalResult, Is.EquivalentTo(res.Data));
     }
     
     [Test]
@@ -133,10 +133,12 @@ public class SolarWatchControllerTests
         // Arrange
         string sunrise = "6 PM", sunset = "5 AM";
         var locationData = new LocationData {City = City, Lat = 1, Lon = 1};
-        var expectedFinalResult = new CityInformation { City = City, Date = _date, Sunrise = sunrise,Sunset = sunset};
+        var repositoryResult = new CityInformation { City = City, Date = _date, Sunrise = sunrise,Sunset = sunset};
+        var expectedFinalResult = new List<CityInformation>
+            { new CityInformation() { City = City, Date = _date, Sunrise = sunrise, Sunset = sunset } };
         _cityRepositoryMock.Setup((x) => x.GetLocationDataByCity(It.IsAny<string>())).ReturnsAsync(locationData);
         _cityRepositoryMock.Setup((x) => x.GetCityByNameAndDate(It.IsAny<string>(), It.IsAny<DateTime>()))
-            .ReturnsAsync(expectedFinalResult);
+            .ReturnsAsync(repositoryResult);
         
         // Act
         var result = await _controller.GetSunsetSunrise(City, _date);
@@ -144,8 +146,8 @@ public class SolarWatchControllerTests
         Assert.IsInstanceOf(typeof(OkObjectResult), result.Result);
         var okResult = (OkObjectResult)result.Result;
         Assert.IsNotNull(okResult.Value);
-        Assert.IsInstanceOf(typeof(OkCityInformationResponse), okResult.Value);
-        var res = (OkCityInformationResponse)okResult.Value;
-        Assert.AreEqual(expectedFinalResult, res.Data);
+        Assert.IsInstanceOf(typeof(OkCityInformationListResponse), okResult.Value);
+        var res = (OkCityInformationListResponse)okResult.Value;
+        Assert.That(expectedFinalResult, Is.EquivalentTo(res.Data));
     }
 }
