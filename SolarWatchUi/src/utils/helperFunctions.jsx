@@ -11,6 +11,11 @@ export const formatDate = (dateString) => {
   return formattedDate;
 };
 
+export const convertTimeToDateTime = (timeString, dateObj) => {
+  const date = dateObj.split("T")[0];
+  return new Date(`${date} ` + timeString);
+};
+
 export const formatTime = (timeString) => {
   const date = new Date("1/1/2013 " + timeString);
   const formattedTime = date.toLocaleTimeString("en-US", {
@@ -44,6 +49,18 @@ export const extractFormObjectFromCityInformationData = (data) => {
     sunsetMinute: Number(sunsetTime[1]),
   };
   return sampleCityInfo;
+};
+
+export const renderForecastOptions = () => {
+  const options = [];
+  for (let i = 0; i < 31; i++) {
+    options.push(
+      <option key={i} value={i + 1}>
+        {i + 1}
+      </option>
+    );
+  }
+  return options;
 };
 
 export const getSearchParam = (searchParams) => {

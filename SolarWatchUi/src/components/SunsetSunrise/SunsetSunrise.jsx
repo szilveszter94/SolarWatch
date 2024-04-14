@@ -6,16 +6,22 @@ import InputComponent from "../InputComponent/InputComponent";
 import { useContext, useState } from "react";
 import { fetchData } from "../../utils/apiService";
 import SnackBar from "../Snackbar/Snackbar";
-import { formatDate, formatTime } from "../../utils/helperFunctions";
+import {
+  formatDate,
+  formatTime,
+  renderForecastOptions,
+} from "../../utils/helperFunctions";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../assets/context/UserContext";
 import Loading from "../Loading/Loading";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
+import SunsetSunriseChart from "./SunsetSunriseChart/SunsetSunriseChart";
 
 const SunsetSunrise = () => {
   const [cityName, setCityName] = useState("");
   const [date, setDate] = useState("");
+  const [forecast, setForecast] = useState(1);
   const [cityInfo, setCityInfo] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const navigate = useNavigate();
@@ -40,24 +46,29 @@ const SunsetSunrise = () => {
           method: "GET",
           body: null,
         });
-        const duplicatedCity = response.data.find(i => i.label == city);
-        if (duplicatedCity){
+        const duplicatedCity = response.data.find((i) => i.label == city);
+        if (duplicatedCity) {
           setSuggestions(response.data);
         } else {
-          setSuggestions([...response.data, {id: "userInput", label: city}]);
+          setSuggestions([...response.data, { id: "userInput", label: city }]);
         }
       } catch (error) {
         console.error("Error fetching suggestions:", error);
       }
     } else {
-      setSuggestions([{id: "userInput", label: city}]);
+      setSuggestions([{ id: "userInput", label: city }]);
     }
+  };
+
+  const handleSelectChange = (e) => {
+    const value = e.target.value;
+    setForecast(value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const path = `/SolarWatch/GetSunsetSunrise?city=${cityName}&date=${date}`;
+      const path = `/SolarWatch/GetSunsetSunrise?city=${cityName}&date=${date}&forecast=${forecast}`;
       const response = await fetchData({
         path: path,
         method: "GET",
@@ -117,7 +128,7 @@ const SunsetSunrise = () => {
                       City:
                     </label>
                     <Autocomplete
-                      className="bg-light text-dark"
+                      className="bg-light text-dark rounded"
                       disablePortal
                       id="combo-box-demo"
                       value={cityName}
@@ -142,6 +153,21 @@ const SunsetSunrise = () => {
                       type="date"
                       onChange={handleDateChange}
                     />
+                    <label
+                      className="form-label text-light fs-4"
+                      htmlFor="forecast"
+                    >
+                      Forecast (optional)
+                    </label>
+                    <select
+                      name="forecast"
+                      id="forecast"
+                      className="form-select"
+                      value={forecast}
+                      onChange={handleSelectChange}
+                    >
+                      {renderForecastOptions()}
+                    </select>
                     <button
                       type="submit"
                       className="btn btn-lg mt-4 btn-outline-light"
@@ -153,15 +179,27 @@ const SunsetSunrise = () => {
               </div>
               <div className="col-md-6">
                 {cityInfo && (
-                  <div className="text-light border rounded mt-4 p-1">
-                    <h1 className="mb-2">{cityInfo.city}</h1>
-                    <h3>{formatDate(cityInfo.date)}</h3>
-                    <h4>Sunrise: {formatTime(cityInfo.sunrise)}</h4>
-                    <h4>Sunset: {formatTime(cityInfo.sunset)}</h4>
+                  <div className="text-light">
+                    <div>
+                      <h1 className="mb-2">{cityInfo[0].city}</h1>
+                      <h3>{formatDate(cityInfo[0].date)}</h3>
+                      <h4>Sunrise: {formatTime(cityInfo[0].sunrise)}</h4>
+                      <h4>Sunset: {formatTime(cityInfo[0].sunset)}</h4>
+                    </div>
                   </div>
                 )}
               </div>
             </div>
+            {cityInfo && cityInfo.length > 1 && (
+              <div className="container">
+                <div className="text-light my-4">
+                  <h2 className="display-4">Sunrise and Sunset Chart</h2>
+                </div>
+                <div className="border rounded my-4 p-5">
+                  <SunsetSunriseChart props={cityInfo} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
