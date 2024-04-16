@@ -4,13 +4,14 @@ import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
+  TimeSeriesScale,
   LinearScale,
+  BarElement,
   PointElement,
   LineElement,
   Title,
   Tooltip,
   Legend,
-  TimeSeriesScale,
 } from "chart.js";
 import moment from "moment";
 import { useEffect, useState } from "react";
@@ -22,13 +23,14 @@ import {
 
 ChartJS.register(
   CategoryScale,
+  TimeSeriesScale,
   LinearScale,
+  BarElement,
   PointElement,
   LineElement,
   Title,
   Tooltip,
-  Legend,
-  TimeSeriesScale
+  Legend
 );
 
 const sunriseDataRaw = {
@@ -37,8 +39,11 @@ const sunriseDataRaw = {
     {
       label: "Sunrise",
       data: [],
-      fill: false,
       borderColor: "rgb(255, 99, 132)",
+      backgroundColor: "rgb(255, 99, 132)",
+      pointBackgroundColor: "rgb(255, 147, 25)",
+      pointStyle: "circle",
+      pointRadius: 5,
       tension: 0.1,
     },
   ],
@@ -50,13 +55,15 @@ const sunsetDataRaw = {
     {
       label: "Sunset",
       data: [],
-      fill: false,
       borderColor: "rgb(54, 162, 235)",
+      backgroundColor: "rgb(54, 162, 235)",
+      pointBackgroundColor: "rgb(100, 255, 132)",
+      pointStyle: "circle",
+      pointRadius: 5,
       tension: 0.1,
     },
   ],
 };
-
 
 const SunsetSunriseChart = ({ props }) => {
   const [sunsetData, setSunsetData] = useState(sunsetDataRaw);
@@ -70,8 +77,12 @@ const SunsetSunriseChart = ({ props }) => {
     const sunsetDataExtracted = [];
     props.forEach((item) => {
       labels.push(moment(item.date).format("MMM DD"));
-      sunriseDataExtracted.push(convertTimeToDateTime(item.sunrise, props[0].date));
-      sunsetDataExtracted.push(convertTimeToDateTime(item.sunset, props[0].date));
+      sunriseDataExtracted.push(
+        convertTimeToDateTime(item.sunrise, props[0].date)
+      );
+      sunsetDataExtracted.push(
+        convertTimeToDateTime(item.sunset, props[0].date)
+      );
     });
     const minimumSunriseDate = new Date(
       Math.min.apply(null, sunriseDataExtracted)
@@ -110,14 +121,20 @@ const SunsetSunriseChart = ({ props }) => {
       : moment(minSunrise)
           .subtract(15, "seconds")
           .format("YYYY-MM-DD HH:mm:ss");
-
+    const legendColor = isSunset ? "rgb(54, 162, 235)" : "rgb(255, 99, 132)";
     return {
       responsive: true,
       plugins: {
         legend: {
+          radius: 8,
+          pointStyle: "circle",
           position: "top",
           labels: {
-            color: "white",
+            padding: 20,
+            usePointStyle: true,
+            boxWidth: 15,
+            boxHeight: 21,
+            color: legendColor,
             font: {
               size: 28,
             },
@@ -133,22 +150,22 @@ const SunsetSunriseChart = ({ props }) => {
       },
       scales: {
         y: {
-          type: "timeseries",
+          type: "time",
           time: {
-            unit: "hour",
-            unitStepSize: 1000,
+            unit: "minute",
             displayFormats: {
-              hour: "HH:mm",
+              minute: "HH:mm",
             },
           },
           ticks: {
+            source: "ticks",
             color: "white",
             font: {
               size: 18,
             },
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.2)",
+            color: "rgba(25, 255, 25, 0.3)",
           },
           min: minimumValue,
         },
@@ -160,7 +177,7 @@ const SunsetSunriseChart = ({ props }) => {
             },
           },
           grid: {
-            color: "rgba(255, 255, 255, 0.2)",
+            color: "rgba(25, 255, 25, 0.3)",
           },
         },
       },
