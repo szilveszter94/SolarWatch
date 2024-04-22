@@ -19,8 +19,8 @@ public class AutocompleteSuggestionSeeder : IAutocompleteSuggestionSeeder
 
     private async Task PopulateAutocompleteTableIfEmpty()
     {
-        var isEmpty = await _cityRepository.GetAllSuggestions();
-        if (isEmpty.Count == 0)
+        var isAny = await _cityRepository.IsAnySuggestion();
+        if (!isAny)
         {
             await _cityRepository.PopulateDatabaseWithCitiesFromFile();
         }

@@ -31,6 +31,11 @@ public class CityRepository : ICityRepository
         return _cityContext.AutocompleteCityModels.Where(c => c.Label.ToLower().Contains(formattedSuggestion)).ToList();
     }
     
+    public async Task<bool> IsAnySuggestion()
+    {
+        return await _cityContext.AutocompleteCityModels.AnyAsync();
+    }
+    
     public async Task<List<AutocompleteCityModel>> GetAllSuggestions()
     {
         return await _cityContext.AutocompleteCityModels.ToListAsync();

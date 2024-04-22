@@ -1,5 +1,4 @@
 using System.Text;
-using DotNetEnv;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,14 +14,7 @@ using SolarWatch.Service.Token;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var userSecrets = new Dictionary<string, string>
-{
-    { "validIssuer", builder.Configuration["JwtSettings:ValidIssuer"] },
-    { "validAudience", builder.Configuration["JwtSettings:ValidAudience"] },
-    { "issuerSigningKey", builder.Configuration["JwtSettings:IssuerSigningKey"] },
-    { "adminEmail", builder.Configuration["AdminInfo:AdminEmail"]},
-    { "adminPassword", builder.Configuration["AdminInfo:AdminPassword"]}
-};
+var conf = builder.Configuration;
 
 AddServices();
 AddCors();
@@ -79,7 +71,7 @@ void AddServices()
     builder.Services.AddScoped<ICityRepository, CityRepository>();
     builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<ITokenService>(provider =>
-        new TokenService(userSecrets["validIssuer"], userSecrets["validAudience"], userSecrets["issuerSigningKey"]));
+        new TokenService(conf["JwtSettings_ValidIssuer"], conf["JwtSettings_ValidAudience"], conf["JwtSettings_IssuerSigningKey"]));
     builder.Services.AddScoped<AuthenticationSeeder>(provider =>
     {
         var roleManager = provider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -87,8 +79,8 @@ void AddServices()
         
         var adminInfo = new Dictionary<string, string>
         {
-            {"adminEmail", userSecrets["adminEmail"]},
-            {"adminPassword", userSecrets["adminPassword"]}
+            {"adminEmail", conf["AdminInfo_AdminEmail"]},
+            {"adminPassword", conf["AdminInfo_AdminPassword"]}
         };
 
         return new AuthenticationSeeder(roleManager, userManager, adminInfo);
@@ -163,10 +155,10 @@ void AddAuthentication()
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = userSecrets["validIssuer"],
-                ValidAudience = userSecrets["validAudience"],
+                ValidIssuer = conf["JwtSettings_ValidIssuer"],
+                ValidAudience = conf["JwtSettings_ValidAudience"],
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(userSecrets["issuerSigningKey"])
+                    Encoding.UTF8.GetBytes(conf["JwtSettings_IssuerSigningKey"])
                 ),
             };
         });
@@ -191,8 +183,7 @@ void AddIdentity()
 
 void AddDbContext()
 {
-    Env.Load();
-    var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+    var connectionString = conf["DB_CONNECTION_STRING"];
     builder.Services.AddDbContext<SolarWatchContext>(options =>
     {
         Console.WriteLine("Trying to connect to database...");

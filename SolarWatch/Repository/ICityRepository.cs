@@ -6,6 +6,7 @@ namespace SolarWatch.Repository;
 public interface ICityRepository
 {
     Task<CityInformation?> GetCityByNameAndDate(string name, DateTime date);
+    Task<bool> IsAnySuggestion();
     Task<List<CityInformation>?> GetAllCityInformation();
     Task PopulateDatabaseWithCitiesFromFile();
     Task<List<AutocompleteCityModel>> GetCityBySuggestion(string suggestion);
